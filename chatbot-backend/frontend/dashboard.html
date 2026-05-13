@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Dashboard</h2>
+            <button onclick="logout()" style="background: #ff3b30;">Logout</button>
+        </div>
+        
+        <div class="card">
+            <h3>Current Tier: <span id="user-tier"></span></h3>
+        </div>
+
+        <div class="card">
+            <h3>Usage: Llama 7B + Qwen2 7B + Phi</h3>
+            <p id="usage-7b">Loading...</p>
+        </div>
+
+        <div class="card">
+            <h3>Usage: Llama 14B</h3>
+            <p id="usage-14b">Loading...</p>
+        </div>
+
+        <div class="card">
+            <h3>Usage: Llama 32B</h3>
+            <p id="usage-32b">Loading...</p>
+        </div>
+
+        <button onclick="window.location.href='/chat.html'" style="width: 100%; padding: 15px; font-size: 18px;">Start Chatting</button>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        checkAuth();
+        fetchUsage();
+    </script>
+</body>
+</html>
