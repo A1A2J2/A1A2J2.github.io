@@ -1,4 +1,13 @@
-const API_BASE = '/api';
+// Dynamically load the backend URL configured by the user, defaulting to current host or relative path
+function getApiBase() {
+    const savedUrl = localStorage.getItem('backend_url');
+    if (savedUrl) {
+        return `${savedUrl}/api`;
+    }
+    return '/api';
+}
+
+const API_BASE = getApiBase();
 
 let currentConversationId = null;
 
