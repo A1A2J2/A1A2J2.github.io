@@ -121,8 +121,13 @@ async function loadConversations() {
                 btn.onclick = () => loadHistory(c.conversation_id);
                 list.appendChild(btn);
             });
-            // Automatically load the latest conversation if it exists
-            if (data.conversations.length > 0) {
+            
+            if (currentConversationId) {
+                // Highlight the active conversation without reloading history
+                const btn = document.getElementById(`conv-${currentConversationId}`);
+                if (btn) btn.classList.add('active');
+            } else if (data.conversations.length > 0) {
+                // Automatically load the latest conversation if it exists and nothing is active
                 loadHistory(data.conversations[0].conversation_id);
             }
         }
