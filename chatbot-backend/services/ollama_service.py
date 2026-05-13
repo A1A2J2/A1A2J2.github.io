@@ -1,21 +1,26 @@
 import httpx
 from config import settings
+from typing import List, Dict
 
-async def generate_response(model: str, prompt: str):
-    url = f"{settings.OLLAMA_BASE_URL}/api/generate"
+async def generate_response(model: str, messages: List[Dict[str, str]]):
+    url = f"{settings.OLLAMA_BASE_URL}/api/chat"
     payload = {
         "model": model,
-        "prompt": prompt,
+        "messages": messages,
         "stream": False,
-        "temperature": 0.7,
-        "top_p": 0.9
+        "options": {
+            "temperature": 0.7,
+            "top_p": 0.9
+        }
     }
     
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(url, json=payload, timeout=60.0)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            # Transform to the expected format to match existing code
+            return {"response": data.get("message", {}).get("content", "")}
         except httpx.TimeoutException:
             return {"error": "timeout"}
         except httpx.RequestError:

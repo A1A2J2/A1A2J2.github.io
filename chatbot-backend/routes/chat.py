@@ -51,7 +51,23 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
         raise HTTPException(status_code=429, detail="Monthly limit reached for this model tier")
 
     # Calling Ollama
-    ollama_res = await generate_response(request.model_id, request.message)
+    messages_payload = []
+    
+    # Fetch history if conversation exists
+    if request.conversation_id:
+        history = db.query(Message).filter(
+            Message.user_id == user_id, 
+            Message.conversation_id == request.conversation_id
+        ).order_by(Message.timestamp.asc()).all()
+        
+        for m in history:
+            messages_payload.append({"role": "user", "content": m.user_message})
+            messages_payload.append({"role": "assistant", "content": m.ai_response})
+            
+    # Append the new message
+    messages_payload.append({"role": "user", "content": request.message})
+
+    ollama_res = await generate_response(request.model_id, messages_payload)
     if "error" in ollama_res:
         if ollama_res["error"] == "timeout":
             raise HTTPException(status_code=504, detail="Gateway Timeout")
