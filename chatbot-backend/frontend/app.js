@@ -17,14 +17,14 @@ function getToken() {
 
 function checkAuth() {
     if (!getToken()) {
-        window.location.href = '/';
+        window.location.href = 'index.html';
     }
 }
 
 function logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
-    window.location.href = '/';
+    window.location.href = 'index.html';
 }
 
 async function login() {
