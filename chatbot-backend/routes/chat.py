@@ -1,18 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from database import get_db, User, Usage, Message
 from models import ChatRequest
 from middleware.auth import get_current_user
 from services.ollama_service import generate_response
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 router = APIRouter()
 
 MODEL_GROUPS = {
     "llama2_7b": "7b",
     "qwen2_7b": "7b",
-    "phi": "7b",
     "llama2_14b": "14b",
     "llama2_32b": "32b"
 }
@@ -51,32 +49,30 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
         raise HTTPException(status_code=429, detail="Monthly limit reached for this model tier")
 
     # Calling Ollama
-    messages_payload = []
+    ollama_model = request.model_id.replace("_", ":")
     
-    # Fetch history if conversation exists
-    if request.conversation_id:
-        history = db.query(Message).filter(
-            Message.user_id == user_id, 
-            Message.conversation_id == request.conversation_id
-        ).order_by(Message.timestamp.asc()).all()
-        
-        for m in history:
-            messages_payload.append({"role": "user", "content": m.user_message})
-            messages_payload.append({"role": "assistant", "content": m.ai_response})
-            
-    # Append the new message
-    messages_payload.append({"role": "user", "content": request.message})
-
-    ollama_res = await generate_response(request.model_id, messages_payload)
+    # Enhance message with internet context if needed
+    enhanced_msg = await enhance_with_internet(request.message)
+    messages_payload = [{"role": "user", "content": enhanced_msg}]
+    
+    ollama_res = await generate_response(ollama_model, messages_payload)
     if "error" in ollama_res:
         if ollama_res["error"] == "timeout":
             raise HTTPException(status_code=504, detail="Gateway Timeout")
         elif ollama_res["error"] == "unavailable":
             raise HTTPException(status_code=503, detail="Service Unavailable")
+        elif ollama_res["error"] == "not_found":
+            raise HTTPException(status_code=404, detail=f"Model '{ollama_model}' not found on Ollama server")
         else:
             raise HTTPException(status_code=500, detail="Error communicating with LLM")
             
     ai_text = ollama_res.get("response", "")
+    
+    # Determine conversation_id
+    conv_id = request.conversation_id
+    if not conv_id:
+        max_conv = db.query(Message).filter(Message.user_id == user_id).order_by(Message.conversation_id.desc()).first()
+        conv_id = (max_conv.conversation_id + 1) if max_conv and max_conv.conversation_id else 1
     
     # Store message
     msg = Message(
@@ -84,7 +80,7 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
         model_used=request.model_id,
         user_message=request.message,
         ai_response=ai_text,
-        conversation_id=request.conversation_id
+        conversation_id=conv_id
     )
     db.add(msg)
     
@@ -93,17 +89,12 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
     db.commit()
     db.refresh(msg)
     
-    if not request.conversation_id:
-        msg.conversation_id = msg.message_id
-        db.commit()
-        db.refresh(msg)
-    
     return {
         "status": "success",
         "message_id": msg.message_id,
+        "conversation_id": conv_id,
         "ai_response": ai_text,
         "model_used": request.model_id,
-        "conversation_id": msg.conversation_id,
         "timestamp": msg.timestamp.isoformat(),
         "uses_remaining": {
             "llama2_7b_qwen2_7b": max(0, LIMITS[tier]["7b"] - usage.model_7b_uses) if tier == "free" else "unlimited",
@@ -112,12 +103,45 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
         }
     }
 
+@router.get("/conversations")
+def get_conversations(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user["user_id"]
+    
+    # 30-day cleanup
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    db.query(Message).filter(Message.user_id == user_id, Message.timestamp < thirty_days_ago, Message.deleted_at == None).update({"deleted_at": datetime.utcnow()})
+    db.commit()
+
+    messages = db.query(Message).filter(Message.user_id == user_id, Message.deleted_at == None).order_by(Message.timestamp.desc()).all()
+    
+    convs = {}
+    for m in messages:
+        cid = m.conversation_id
+        if cid not in convs and cid is not None:
+            title = m.user_message[:30] + "..." if len(m.user_message) > 30 else m.user_message
+            convs[cid] = {"conversation_id": cid, "title": title}
+            
+    return {"conversations": list(convs.values())}
+
+@router.delete("/conversation/{conversation_id}")
+def delete_conversation(conversation_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user["user_id"]
+    messages = db.query(Message).filter(Message.user_id == user_id, Message.conversation_id == conversation_id).all()
+    if not messages:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    for m in messages:
+        m.deleted_at = datetime.utcnow()
+    db.commit()
+    return {"status": "success", "message": "Conversation deleted"}
+
 @router.get("/history")
 def get_history(conversation_id: int = None, limit: int = 50, offset: int = 0, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user_id = current_user["user_id"]
-    query = db.query(Message).filter(Message.user_id == user_id)
+    
+    query = db.query(Message).filter(Message.user_id == user_id, Message.deleted_at == None)
     if conversation_id:
         query = query.filter(Message.conversation_id == conversation_id)
+        
     messages = query.order_by(Message.timestamp.desc()).offset(offset).limit(limit).all()
     count = query.count()
     
@@ -132,31 +156,4 @@ def get_history(conversation_id: int = None, limit: int = 50, offset: int = 0, c
             } for m in messages
         ],
         "total_count": count
-    }
-
-@router.get("/conversations")
-def get_conversations(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    user_id = current_user["user_id"]
-    
-    # Identify unique conversations for the user
-    subquery = db.query(
-        Message.conversation_id,
-        func.min(Message.timestamp).label("start_time")
-    ).filter(Message.user_id == user_id).group_by(Message.conversation_id).subquery()
-    
-    # Join back to get the message that started the conversation (for a title)
-    conversations = db.query(Message).join(
-        subquery,
-        (Message.conversation_id == subquery.c.conversation_id) & 
-        (Message.timestamp == subquery.c.start_time)
-    ).order_by(Message.timestamp.desc()).all()
-
-    return {
-        "conversations": [
-            {
-                "conversation_id": c.conversation_id,
-                "title": c.user_message[:30] + ("..." if len(c.user_message) > 30 else ""),
-                "timestamp": c.timestamp.isoformat()
-            } for c in conversations if c.conversation_id is not None
-        ]
     }

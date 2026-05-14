@@ -139,12 +139,43 @@ async function loadConversations() {
             if(!list) return; // Prevent errors on non-chat pages
             list.innerHTML = '';
             data.conversations.forEach(c => {
+                const wrap = document.createElement('div');
+                wrap.style.display = 'flex';
+                wrap.style.gap = '5px';
+                wrap.style.marginBottom = '5px';
+
                 const btn = document.createElement('button');
                 btn.className = 'conv-btn';
                 btn.id = `conv-${c.conversation_id}`;
                 btn.innerText = c.title || 'New Chat';
                 btn.onclick = () => loadHistory(c.conversation_id);
-                list.appendChild(btn);
+                btn.style.flex = '1';
+
+                const delBtn = document.createElement('button');
+                delBtn.innerText = '✕';
+                delBtn.style.padding = '0 10px';
+                delBtn.style.background = '#ff3b30';
+                delBtn.style.color = '#fff';
+                delBtn.style.border = 'none';
+                delBtn.style.borderRadius = '8px';
+                delBtn.style.cursor = 'pointer';
+                delBtn.onclick = async () => {
+                    if(confirm('Delete this chat?')) {
+                        await fetch(`${API_BASE}/chat/conversation/${c.conversation_id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${getToken()}`,
+                                'ngrok-skip-browser-warning': 'true'
+                            }
+                        });
+                        if(currentConversationId === c.conversation_id) newChat();
+                        loadConversations();
+                    }
+                };
+
+                wrap.appendChild(btn);
+                wrap.appendChild(delBtn);
+                list.appendChild(wrap);
             });
             
             if (currentConversationId) {
