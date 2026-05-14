@@ -1,10 +1,5 @@
-// Dynamically load the backend URL configured by the user, defaulting to current host or relative path
+// Hardcode the backend URL to your Ngrok tunnel
 function getApiBase() {
-    const savedUrl = localStorage.getItem('backend_url');
-    if (savedUrl) {
-        return `${savedUrl}/api`;
-    }
-    // Use your actual Ngrok URL
     return 'https://illusion-winter-radar.ngrok-free.dev/api';
 }
 
