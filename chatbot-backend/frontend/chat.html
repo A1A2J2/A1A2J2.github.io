@@ -13,27 +13,38 @@
         .message { margin-bottom: 15px; padding: 12px 16px; border-radius: 12px; max-width: 80%; }
         .user { background: #EDE7F6; margin-left: auto; text-align: right; }
         .ai { background: #FFFFFF; border: 1px solid #E0E0E0; margin-right: auto; text-align: left; }
-        .input-area { display: flex; gap: 10px; }
-        .input-area input { margin-bottom: 0; flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        .input-area { display: flex; gap: 10px; align-items: center; }
+        .input-area input[type="text"] { margin-bottom: 0; flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
         .ts { font-size: 10px; color: #888; display: block; margin-top: 5px; }
         
         .conv-btn { background: #555555; color: #ffffff; border: none; padding: 10px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; box-sizing: border-box; flex-shrink: 0; }
         .conv-btn:hover { background: #666666; }
         .conv-btn.active { background: #6200EA; color: white; }
         .new-chat-btn { background: #6200EA; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
+        
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: #f9f9f9; min-width: 120px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; overflow: hidden; }
+        .dropdown-content button { color: black; padding: 12px 16px; text-decoration: none; display: block; border: none; background: none; width: 100%; text-align: left; cursor: pointer; }
+        .dropdown-content button:hover { background-color: #f1f1f1; }
+        .show { display: block; }
     </style>
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <button onclick="window.location.href='dashboard.html'" style="background: #8e8e93; padding: 8px 16px; border: none; color: white; border-radius: 8px; cursor: pointer;">Back to Dashboard</button>
-            <select id="model-select" style="padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
-                <option value="llama2_7b">Llama 2 7B</option>
-                <option value="qwen2_7b">Qwen2 7B</option>
-                <option value="phi">Phi</option>
-                <option value="llama2_14b">Llama 2 14B</option>
-                <option value="llama2_32b">Llama 2 32B</option>
-            </select>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <textarea id="system-prompt" style="display: none; height: 30px; border-radius: 8px; border: 1px solid #ccc; padding: 5px; resize: none;" placeholder="System prompt (admin only)"></textarea>
+                <select id="model-select" style="padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
+                    <option value="llama2_7b">Llama 2 7B</option>
+                    <option value="qwen2_7b">Qwen2 7B</option>
+                    <option value="phi">Phi</option>
+                    <option value="llama2_14b">Llama 2 14B</option>
+                    <option value="llama2_32b">Llama 2 32B</option>
+                    <option value="llama3_7b">Llama 3 7B</option>
+                    <option value="llama3_14b">Llama 3 14B</option>
+                </select>
+            </div>
         </div>
         
         <div class="chat-layout">
@@ -42,7 +53,7 @@
                 <div id="conversations-list">
                     <!-- Conversations go here -->
                 </div>
-                <div style="text-align: center; margin-top: auto; padding-top: 10px; color: #888; font-size: 12px;">v0.3.7</div>
+                <div style="text-align: center; margin-top: auto; padding-top: 10px; color: #888; font-size: 12px;">v0.5.0</div>
             </div>
             
             <div class="chat-container">
@@ -51,6 +62,9 @@
                 </div>
 
                 <div class="input-area">
+                    <label style="display: flex; align-items: center; gap: 5px; font-size: 14px;">
+                        <input type="checkbox" id="web-search-toggle"> Web Search
+                    </label>
                     <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="if(event.key === 'Enter') sendMessage()">
                     <button id="send-btn" onclick="sendMessage()" style="padding: 10px 20px; border: none; background: #6200EA; color: white; border-radius: 8px; cursor: pointer;">Send</button>
                 </div>
@@ -58,10 +72,28 @@
             </div>
         </div>
     </div>
-    <script src="app.js?v=0.3.7"></script>
+    <script src="app.js?v=0.5.0"></script>
     <script>
         checkAuth();
         loadConversations();
+        
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        if (userInfo.tier === 'admin') {
+            document.getElementById('system-prompt').style.display = 'block';
+        }
+        
+        // Close dropdowns if clicked outside
+        window.onclick = function(event) {
+          if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+              var openDropdown = dropdowns[i];
+              if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+              }
+            }
+          }
+        }
     </script>
 </body>
 </html>

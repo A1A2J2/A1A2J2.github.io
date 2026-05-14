@@ -14,9 +14,20 @@ async def generate_response(model: str, messages: List[Dict[str, str]]):
         }
     }
     
+    # Dynamic timeouts based on model
+    timeout = 60.0 # default
+    if "phi" in model.lower():
+        timeout = 180.0
+    elif "7b" in model.lower():
+        timeout = 300.0
+    elif "14b" in model.lower():
+        timeout = 450.0
+    elif "32b" in model.lower():
+        timeout = 750.0
+        
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, json=payload, timeout=60.0)
+            response = await client.post(url, json=payload, timeout=timeout)
             response.raise_for_status()
             data = response.json()
             # Transform to the expected format to match existing code

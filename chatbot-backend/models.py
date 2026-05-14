@@ -18,6 +18,14 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=5000)
     model_id: str
     conversation_id: Optional[int] = None
+    web_search: Optional[bool] = False
+    system_prompt: Optional[str] = None
+
+class MemoryUpdate(BaseModel):
+    content: str
+
+class ConversationRename(BaseModel):
+    title: str
 
 class WebAuthnRegisterOptions(BaseModel):
     username: str = Field(..., min_length=3, max_length=20)

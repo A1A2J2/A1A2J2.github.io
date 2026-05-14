@@ -55,6 +55,21 @@ class Usage(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class Memory(Base):
+    __tablename__ = "memories"
+    memory_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    content = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+    conversation_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    title = Column(String, default="New Chat")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class Message(Base):
     __tablename__ = "messages"
     message_id = Column(Integer, primary_key=True, index=True)
@@ -64,7 +79,7 @@ class Message(Base):
     ai_response = Column(String, nullable=False)
     tokens_estimated = Column(Integer, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
-    conversation_id = Column(Integer, nullable=True)
+    conversation_id = Column(Integer, ForeignKey("conversations.conversation_id"), nullable=True)
     deleted_at = Column(DateTime, nullable=True)
 
 def get_db():
