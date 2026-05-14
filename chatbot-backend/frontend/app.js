@@ -34,7 +34,10 @@ async function login() {
     try {
         const res = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({username: u, password: p})
         });
         const data = await res.json();
@@ -57,7 +60,10 @@ async function signup() {
     try {
         const res = await fetch(`${API_BASE}/auth/signup`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({username: u, email: e, password: p})
         });
         const data = await res.json();
@@ -79,7 +85,10 @@ async function signup() {
 async function fetchUsage() {
     try {
         const res = await fetch(`${API_BASE}/usage/remaining`, {
-            headers: {'Authorization': `Bearer ${getToken()}`}
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'ngrok-skip-browser-warning': 'true'
+            }
         });
         if(res.status === 401) return logout();
         const data = await res.json();
@@ -115,7 +124,10 @@ function appendMessage(text, sender, model) {
 async function loadConversations() {
     try {
         const res = await fetch(`${API_BASE}/chat/conversations`, {
-            headers: {'Authorization': `Bearer ${getToken()}`}
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'ngrok-skip-browser-warning': 'true'
+            }
         });
         if(res.status === 401) return logout();
         const data = await res.json();
@@ -169,7 +181,10 @@ async function loadHistory(conversationId = null) {
 
     try {
         const res = await fetch(`${API_BASE}/chat/history?conversation_id=${conversationId}`, {
-            headers: {'Authorization': `Bearer ${getToken()}`}
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'ngrok-skip-browser-warning': 'true'
+            }
         });
         if(res.status === 401) return logout();
         const data = await res.json();
@@ -206,7 +221,8 @@ async function sendMessage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
+                'Authorization': `Bearer ${getToken()}`,
+                'ngrok-skip-browser-warning': 'true'
             },
             body: JSON.stringify(body)
         });
@@ -251,7 +267,10 @@ async function signupWithPasskey() {
     try {
         const resp = await fetch(`${API_BASE}/webauthn/register/options`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({ username: u, email: e })
         });
         
@@ -265,7 +284,10 @@ async function signupWithPasskey() {
         
         const verifyResp = await fetch(`${API_BASE}/webauthn/register/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({
                 session_id: data.session_id,
                 credential: attResp
@@ -301,7 +323,10 @@ async function loginWithPasskey() {
     try {
         const resp = await fetch(`${API_BASE}/webauthn/login/options`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({ username: u })
         });
         
@@ -315,7 +340,10 @@ async function loginWithPasskey() {
         
         const verifyResp = await fetch(`${API_BASE}/webauthn/login/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({
                 session_id: data.session_id,
                 credential: asseResp
