@@ -35,6 +35,14 @@ async function login() {
             },
             body: JSON.stringify({username: u, password: p})
         });
+            
+            const contentType = res.headers.get("content-type");
+            if (!res.ok && (!contentType || !contentType.includes("application/json"))) {
+                document.getElementById('login-error').innerText = `Server error ${res.status}. Check backend terminal.`;
+                console.error("Server crashed. HTML/Text response:", await res.text());
+                return;
+            }
+            
         const data = await res.json();
         if(res.ok) {
             localStorage.setItem('auth_token', data.token);
