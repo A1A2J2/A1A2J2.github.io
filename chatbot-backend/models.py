@@ -10,6 +10,10 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class UserVerify(BaseModel):
+    email: EmailStr
+    code: str
+
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=5000)
     model_id: str

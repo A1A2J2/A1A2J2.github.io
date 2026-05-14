@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>LLM Chatbot - Login</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=0.3.7">
     <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 </head>
 <body>
@@ -28,8 +28,19 @@
             <p class="error" id="signup-error"></p>
             <p>Already have an account? <a href="#" onclick="toggleMode('login')">Login</a></p>
         </div>
+
+        <div class="card" id="verify-card" style="display: none;">
+            <h2>Verify Email</h2>
+            <p style="font-size: 14px; margin-bottom: 15px;">We've sent a 6-digit code to your email.</p>
+            <input type="email" id="verify-email" readonly style="background: #eee;">
+            <input type="text" id="verify-code" placeholder="6-digit code">
+            <button onclick="verifyEmail()">Verify & Create Account</button>
+            <p class="error" id="verify-error"></p>
+            <p><a href="#" onclick="toggleMode('signup')">Back to Sign Up</a></p>
+        </div>
+        <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">v0.3.7</div>
     </div>
-    <script src="app.js"></script>
+    <script src="app.js?v=0.3.7"></script>
     <script>
         if (localStorage.getItem('auth_token')) {
             window.location.href = 'dashboard.html';

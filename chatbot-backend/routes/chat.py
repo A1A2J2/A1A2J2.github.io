@@ -4,6 +4,7 @@ from database import get_db, User, Usage, Message
 from models import ChatRequest
 from middleware.auth import get_current_user
 from services.ollama_service import generate_response
+from services.web_service import enhance_with_internet
 from datetime import datetime, date, timedelta
 
 router = APIRouter()
@@ -11,6 +12,7 @@ router = APIRouter()
 MODEL_GROUPS = {
     "llama2_7b": "7b",
     "qwen2_7b": "7b",
+    "phi": "7b",
     "llama2_14b": "14b",
     "llama2_32b": "32b"
 }
@@ -53,7 +55,10 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
     
     # Enhance message with internet context if needed
     enhanced_msg = await enhance_with_internet(request.message)
-    messages_payload = [{"role": "user", "content": enhanced_msg}]
+    messages_payload = [
+        {"role": "system", "content": "You are a helpful and friendly AI assistant. Please use emojis in your responses! 😊"},
+        {"role": "user", "content": enhanced_msg}
+    ]
     
     ollama_res = await generate_response(ollama_model, messages_payload)
     if "error" in ollama_res:

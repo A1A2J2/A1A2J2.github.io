@@ -35,6 +35,15 @@ class AuthChallenge(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True) # None for login, filled for register
     expires_at = Column(DateTime, nullable=False)
 
+class EmailVerification(Base):
+    __tablename__ = "email_verifications"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)
+    code = Column(String, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+
 class Usage(Base):
     __tablename__ = "usage"
     usage_id = Column(Integer, primary_key=True, index=True)

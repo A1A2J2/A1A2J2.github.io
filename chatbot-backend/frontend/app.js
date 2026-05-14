@@ -85,6 +85,27 @@ async function signup() {
     }
 }
 
+async function verifyEmail() {
+    const e = document.getElementById('verify-email').value;
+    const c = document.getElementById('verify-code').value;
+    try {
+        const res = await fetch(`${API_BASE}/auth/verify-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+            body: JSON.stringify({email: e, code: c})
+        });
+        const data = await res.json();
+        if(res.ok) {
+            alert('Email verified and account created! Please login.');
+            toggleMode('login');
+        } else {
+            document.getElementById('verify-error').innerText = data.detail || 'Verification failed';
+        }
+    } catch(err) {
+        document.getElementById('verify-error').innerText = 'Network error';
+    }
+}
+
 async function fetchUsage() {
     try {
         const res = await fetch(`${API_BASE}/usage/remaining`, {
