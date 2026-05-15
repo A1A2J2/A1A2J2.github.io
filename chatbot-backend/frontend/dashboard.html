@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css?v=0.3.7">
-    <style>
-        .memory-item { background: #f0f0f0; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .memory-actions button { margin-left: 5px; padding: 5px 10px; cursor: pointer; border: none; border-radius: 5px; }
-        .memory-edit { background: #ffcc00; }
-        .memory-del { background: #ff3b30; color: white; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -28,28 +22,21 @@
         </div>
 
         <div class="card">
-            <h3>Usage: Llama 14B</h3>
-            <p id="usage-14b">Loading...</p>
+            <h3>Usage: Llama 2 13B</h3>
+            <p id="usage-13b">Loading...</p>
         </div>
 
         <div class="card">
-            <h3>Usage: Llama 32B</h3>
-            <p id="usage-32b">Loading...</p>
-        </div>
-
-        <div class="card">
-            <h3>Global AI Memories</h3>
-            <div id="memories-list">Loading memories...</div>
+            <h3>Usage: Llama 3 8B & Qwen 3 8B</h3>
+            <p id="usage-8b">Loading...</p>
         </div>
 
         <button onclick="window.location.href='chat.html'" style="width: 100%; padding: 15px; font-size: 18px;">Start Chatting</button>
-        <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">v0.5.0</div>
     </div>
-    <script src="app.js?v=0.5.0"></script>
+    <script src="app.js"></script>
     <script>
         checkAuth();
         fetchUsage();
-        loadMemories();
     </script>
 </body>
 </html>
