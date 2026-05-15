@@ -7,9 +7,9 @@ from datetime import date, timedelta
 router = APIRouter()
 
 LIMITS = {
-    "free": {"7b": 100, "14b": 5, "32b": 1},
-    "paid": {"7b": "unlimited", "14b": 25, "32b": 10},
-    "admin": {"7b": "unlimited", "14b": "unlimited", "32b": "unlimited"}
+    "free": {"7b": 100, "8b": 100, "13b": 5, "32b": 1},
+    "paid": {"7b": "unlimited", "8b": "unlimited", "13b": 25, "32b": 10},
+    "admin": {"7b": "unlimited", "8b": "unlimited", "13b": "unlimited", "32b": "unlimited"}
 }
 
 @router.get("/remaining")
@@ -24,7 +24,8 @@ def get_remaining_uses(current_user: dict = Depends(get_current_user), db: Sessi
     if (date.today() - usage.month_start_date).days >= 30:
         usage.month_start_date = date.today()
         usage.model_7b_uses = 0
-        usage.model_14b_uses = 0
+        usage.model_8b_uses = 0
+        usage.model_13b_uses = 0
         usage.model_32b_uses = 0
         db.commit()
 
@@ -36,10 +37,15 @@ def get_remaining_uses(current_user: dict = Depends(get_current_user), db: Sessi
                 "limit": LIMITS[tier]["7b"],
                 "remaining": LIMITS[tier]["7b"] - usage.model_7b_uses if LIMITS[tier]["7b"] != "unlimited" else None
             },
-            "llama2_14b": {
-                "used": usage.model_14b_uses,
-                "limit": LIMITS[tier]["14b"],
-                "remaining": LIMITS[tier]["14b"] - usage.model_14b_uses if LIMITS[tier]["14b"] != "unlimited" else None
+            "llama3_8b": {
+                "used": usage.model_8b_uses,
+                "limit": LIMITS[tier]["8b"],
+                "remaining": LIMITS[tier]["8b"] - usage.model_8b_uses if LIMITS[tier]["8b"] != "unlimited" else None
+            },
+            "llama2_13b": {
+                "used": usage.model_13b_uses,
+                "limit": LIMITS[tier]["13b"],
+                "remaining": LIMITS[tier]["13b"] - usage.model_13b_uses if LIMITS[tier]["13b"] != "unlimited" else None
             },
             "llama2_32b": {
                 "used": usage.model_32b_uses,
