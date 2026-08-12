@@ -8,27 +8,21 @@
         body {
             background-color: white;
             font-family: sans-serif;
+            text-align: center;
             margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Prevents weird horizontal scrolling */
-            min-height: 2000px; /* Makes a long page so ads have space to scatter */
+            padding: 50px 20px;
         }
         h1 {
-            font-size: 80px;
-            font-weight: 900;
+            font-size: 50px;
+            font-weight: 600;
             letter-spacing: 5px;
-            text-align: center;
-            margin-top: 50px;
-            position: relative;
-            z-index: 100; /* Keeps the word ADS layered on top */
-            pointer-events: none; /* Stops it from blocking clicks */
+            margin-bottom: 40px;
         }
-        /* This makes the ads break free from rows and columns */
-        .crazy-ad {
-            position: absolute !important;
-            border: 0;
-            padding: 0;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.3); /* Adds a shadow so they pop out */
+        .ad-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
     </style>
 </head>
@@ -37,40 +31,15 @@
     <!-- Your big bold text -->
     <h1>ADS</h1>
 
-    <!-- 10 Ads that will get randomly scattered by the script below -->
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:300px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:300px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:250px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:336px; height:280px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:300px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:200px; height:200px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:300px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:250px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:300px; height:250px;'></iframe>
-    <iframe class="crazy-ad" data-aa='2451835' src='https://a-ads.com' style='width:336px; height:280px;'></iframe>
-
-    <!-- This magic script instantly breaks the perfect grid and scrambles everything -->
-    <script>
-        const ads = document.querySelectorAll('.crazy-ad');
+    <!-- This is where your actual ads will load -->
+    <div class="ad-container">
         
-        ads.forEach(ad => {
-            // Generates completely random coordinates on the page
-            const randomX = Math.floor(Math.random() * (window.innerWidth - 320));
-            const randomY = Math.floor(Math.random() * 1500) + 150; // Scatters them down the page
-            
-            // Generates a random rotation angle between -15 and 15 degrees
-            const randomRotate = Math.floor(Math.random() * 30) - 15;
-            
-            // Generates a random layout stacking layer
-            const randomZIndex = Math.floor(Math.random() * 50);
+        <!-- PASTE YOUR AD NETWORK CODE RIGHT BELOW THIS LINE -->
+        <iframe data-aa='2451835' src='https://acceptable.a-ads.com/2451835/?size=Adaptive'
+                            style='border:0; padding:0; width:70%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>
+        <!-- PASTE YOUR AD NETWORK CODE RIGHT ABOVE THIS LINE -->
 
-            // Applies the crazy styles directly to the ad block
-            ad.style.left = randomX + 'px';
-            ad.style.top = randomY + 'px';
-            ad.style.transform = `rotate(${randomRotate}deg)`;
-            ad.style.zIndex = randomZIndex;
-        });
-    </script>
+    </div>
 
 </body>
 </html>
